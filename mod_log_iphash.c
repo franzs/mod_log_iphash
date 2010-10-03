@@ -79,6 +79,23 @@ generate_salt(char *s, size_t size)
 	}
 }
 
+static void *
+iphash_create_server_config(apr_pool_t *p, server_rec *s)
+{
+	apr_status_t	rv;
+
+	iphash_config_t *cf = apr_pcalloc(p, sizeof(iphash_config_t));
+	memset(cf->salt, 0, sizeof(cf->salt));
+
+	if ((rv = seed_rand())) {
+		ap_log_error(APLOG_MARK, APLOG_ERR, 0, s, "Unable to generate random bytes: %pm", &rv);
+	}
+
+	generate_salt(cf->salt, SALT_SIZE);
+
+	return cf;
+}
+
 /*
  * Format items...
  */
@@ -137,33 +154,10 @@ log_iphash_pre_config(apr_pool_t * p, apr_pool_t * plog, apr_pool_t * ptemp)
 	return OK;
 }
 
-static int
-initialize_module(apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
-{
-	apr_status_t	rv;
-
-	iphash_config_t *cf = apr_pcalloc(p, sizeof(iphash_config_t));
-	/* XXX: ??? */
-	memset(cf->salt, 0, sizeof(cf->salt));
-
-	ap_set_module_config(s->module_config, &log_iphash_module, cf);
-
-	if ((rv = seed_rand())) {
-		ap_log_error(APLOG_MARK, APLOG_ERR, 0, s, "mod_log_iphash: Unable to generate random bytes: %pm", &rv);
-
-		return !OK;
-	}
-
-	generate_salt(cf->salt, SALT_SIZE);
-
-	return OK;
-}
-
 static void 
 register_hooks(apr_pool_t * p)
 {
 	ap_hook_pre_config(log_iphash_pre_config, NULL, NULL, APR_HOOK_REALLY_FIRST);
-	ap_hook_post_config(initialize_module, NULL, NULL, APR_HOOK_MIDDLE);
 }
 
 module AP_MODULE_DECLARE_DATA log_iphash_module =
@@ -171,7 +165,7 @@ module AP_MODULE_DECLARE_DATA log_iphash_module =
 	STANDARD20_MODULE_STUFF,
 	NULL,			/* create per-dir config */
 	NULL,			/* merge per-dir config */
-	NULL,			/* server config */
+	iphash_create_server_config,	/* server config */
 	NULL,			/* merge server config */
 	NULL,			/* command apr_table_t */
 	register_hooks		/* register hooks */
