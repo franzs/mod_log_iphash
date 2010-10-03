@@ -1,0 +1,43 @@
+mod_log_iphash
+==============
+Apache module for anonymous logging of ip address
+
+Description
+-----------
+
+mod_log_iphash generates a MD5 hash of the salted ip address from the remote 
+host. The MD5 hash is converted to a pseudo IPv6 address to give statistics
+tools a chance to work.
+
+It adds the '%Z' directive to LogFormat which is intended as an alternative
+to '%h', e. g.
+
+LogFormat "%Z %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" iphash
+CustomLog /var/log/httpd-access.log iphash
+
+The main purpose of mod_log_iphash is to fulfil a privacy policy where
+ip address logging is not permitted.
+
+
+How to compile
+--------------
+
+% apxs -c mod_log_iphash.c
+
+
+How to install
+--------------
+
+# apxs -i -a mod_log_iphash.la
+
+
+Contact the author
+------------------
+
+Franz Schwartau <franz at electromail.org>
+
+
+Homepage
+--------
+
+http://wiki.bitstreet.org/Mod_log_iphash
