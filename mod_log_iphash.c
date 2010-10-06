@@ -88,7 +88,8 @@ iphash_create_server_config(apr_pool_t *p, server_rec *s)
 	memset(cf->salt, 0, sizeof(cf->salt));
 
 	if ((rv = seed_rand())) {
-		ap_log_error(APLOG_MARK, APLOG_ERR, 0, s, "Unable to generate random bytes: %pm", &rv);
+		ap_log_error(APLOG_MARK, APLOG_ERR, 0, s, "mod_log_iphash: Unable to generate random bytes: %pm. Exiting.", &rv);
+		exit(1);
 	}
 
 	generate_salt(cf->salt, SALT_SIZE);
