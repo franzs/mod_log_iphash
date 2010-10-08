@@ -48,7 +48,7 @@ typedef struct iphash_config_t {
 
 /* seed_rand() copied from support/htpasswd.c */
 
-static apr_status_t 
+static apr_status_t
 seed_rand(void)
 {
 	int		seed = 0;
@@ -67,14 +67,15 @@ seed_rand(void)
 
 /* generate_salt() copied from support/htpasswd.c */
 
-static void 
+static void
 generate_salt(char *s, size_t size)
 {
 	static unsigned char tbl[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-	size_t		     i;
+	size_t               i;
 
 	for (i = 0; i < size; ++i) {
 		int idx = (int)(64.0 * rand() / (RAND_MAX + 1.0));
+
 		s[i] = tbl[idx];
 	}
 }
@@ -102,7 +103,7 @@ iphash_create_server_config(apr_pool_t *p, server_rec *s)
  */
 
 static const char *
-log_ip_hash(request_rec * r, char *a)
+log_ip_hash(request_rec *r, char *a)
 {
 	char           *hashed_ip;
 	char           *salted_ip;
@@ -141,8 +142,8 @@ log_ip_hash(request_rec * r, char *a)
  * The hooks...
  */
 
-static int 
-log_iphash_pre_config(apr_pool_t * p, apr_pool_t * plog, apr_pool_t * ptemp)
+static int
+log_iphash_pre_config(apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp)
 {
 	static		APR_OPTIONAL_FN_TYPE(ap_register_log_handler) * log_pfn_register;
 
@@ -155,8 +156,8 @@ log_iphash_pre_config(apr_pool_t * p, apr_pool_t * plog, apr_pool_t * ptemp)
 	return OK;
 }
 
-static void 
-register_hooks(apr_pool_t * p)
+static void
+register_hooks(apr_pool_t *p)
 {
 	ap_hook_pre_config(log_iphash_pre_config, NULL, NULL, APR_HOOK_REALLY_FIRST);
 }
